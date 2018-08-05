@@ -39,20 +39,23 @@ class CanvasButtons {
             this.cbs.lx = cX;
             this.cbs.ly = cY;
             
-            for(i = 0; i<this.cbs.arr.length; ++i)
+            for(i = 0; i<this.cbs.arr.length; ++i)  // for each button in arr
                 if(this.cbs.arr[i].x<=cX&&this.cbs.arr[i].cx>=cX&&
-                   this.cbs.arr[i].y<=cY&&this.cbs.arr[i].cy>=cY)
-                    this.cbs.arr[i].f(cX-this.cbs.arr[i].x, cY-this.cbs.arr[i].y);
+                   this.cbs.arr[i].y<=cY&&this.cbs.arr[i].cy>=cY)   // check is there was a click on this button
+                    this.cbs.arr[i].f(cX-this.cbs.arr[i].x, cY-this.cbs.arr[i].y);  // if so, call function assigned to this button
         }
     }
     add(p, t, o={}, f=null){
-        if(!o.hasOwnProperty('h'))o.h=30;
-        if(!o.hasOwnProperty('m'))o.m=5;
-        if(!o.hasOwnProperty('c'))o.c='black';
+        if(!o.hasOwnProperty('h'))o.h=30;   // height
+        if(!o.hasOwnProperty('m'))o.m=5;    // margin
+        if(!o.hasOwnProperty('c'))o.c='black';  // color
+        if(!o.hasOwnProperty('c'))o.b=true; // border
+        // fill with default values
         this.ctx.font = o.h+'px fantasy';
         this.ctx.strokeStyle = o.c;
         var w = this.ctx.measureText(t).width;
-        this.ctx.strokeRect(p.x-w/2-o.m, p.y-o.h/2-o.m, w+o.m*2, o.h+o.m*2);
+        if(o.b)
+            this.ctx.strokeRect(p.x-w/2-o.m, p.y-o.h/2-o.m, w+o.m*2, o.h+o.m*2);
         this.ctx.strokeText(t, p.x-w/2, p.y+o.h/4);
         if(f!=null){
             var n = {x:p.x-w/2-o.m, y:p.y-o.h/2-o.m, w:w+o.m*2, h:o.h+o.m*2, f:f};
@@ -76,7 +79,7 @@ function init() {
         ctx.strokeRect(i,i,WIDTH-2*i,HEIGHT-2*i);
     cb = new CanvasButtons(canvas);
     
-    cb.add({x:WIDTH/2,y:HEIGHT/2},'Start new game', {h:5}, function(a,b){alert(a+' '+b);});
+    cb.add({x:WIDTH/2,y:HEIGHT/2},'Start new game', {b:false}, function(a,b){alert(a+' '+b);});
 }
 </script>
 </head>
