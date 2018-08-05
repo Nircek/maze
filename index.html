@@ -5,8 +5,25 @@
 <title>Nircek's Maze</title>
 <meta name="description" content="Maze Game Project by Nircek">
 <meta name="author" content="Nircek">
+<style>
+*{margin: 0;}
+</style>
+<script>
+var canvas;
+var ctx;
+var WIDTH;
+var HEIGHT;
+function init() {
+    canvas = document.getElementById('canvas');
+    ctx = canvas.getContext('2d');
+    WIDTH = document.body.scrollWidth;
+    HEIGHT = window.innerHeight-Math.PI;
+    canvas.width = WIDTH;
+    canvas.height = HEIGHT;
+}
+</script>
 </head>
-<body>
-
+<body onload="init()">
+<canvas id="canvas" width="0" height="0"></canvas>
 </body>
 </html>
