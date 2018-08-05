@@ -15,71 +15,88 @@ var WIDTH;
 var HEIGHT;
 var cb;
 
-/*
-// src: https://gist.github.com/Nircek/7e1ee37e0bbc30f7ab554c633209a8d4
-// this is a script for generating mazes in Python, I wrote that because I don't feel good in JS and now I will rewrite that to JS
-from random import random
-from os import system
-from msvcrt import getch
-class Map:
-  def __init__(self,W,H):
-    self.W=W
-    self.H=H
-    self.X = -1
-    self.Y = -1
-    self.m = []
-    for i in range(self.H):
-      self.m += [[]]
-      for j in range(self.W):
-        self.m[i] += ['█']
 
-  def view(self):
-    for i in range(self.W+2):
-      print('█',end='')
-    print()
-    for i in range(self.H):
-      print('█',end='')
-      for j in range(self.W):
-        print(self.m[i][j],end='')
-      print('█')
-    for i in range(self.W+2):
-      print('█',end='')
-    print()
+class Map {
+    constructor(W, H) {
+        this.W=W;
+        this.H=H;
+        this.m = [];
+        this.buf = '';
+        for(i=0;i<this.H;++i){
+            this.m=this.m.concat([[]]);
+            for(var j=0;j<this.W;++j)
+                this.m[i]=this.m[i].concat('█');
+        }
+    }
+    bufor(x, p=false) {
+        this.buf += x;
+        if(p) {
+            console.log(this.buf);
+            this.buf = '';
+        }
+    }
+    view() {
+        for(i=0;i<this.W+2;++i)
+            this.bufor('█');
+        this.bufor('', true);
+        for(i=0;i<this.H;++i) {
+            this.bufor('█');
+            for(let j=0;j<this.W;++j)
+                this.bufor(this.m[i][j]);
+            this.bufor('█', true);
+        }
+        for(i=0;i<this.W+2; ++i)
+            this.bufor('█');
+        this.bufor('', true);
+    }
 
-  def get(self,x,y):
-    if x in range(self.W) and y in range(self.H):
-      return self.m[x][y]
-    else:
-      return '█'
+    get(x,y) {
+        if(x<this.W&&x>=0&&y<this.H&&y>=0)
+            return this.m[x][y];
+        else return '█';
+    }
+    set(x,y,z) {
+        if(x<this.W&&x>=0&&y<this.H&&y>=0)
+            this.m[x][y] = z
+    }
 
-  def set(self,x,y,z):
-    if x in range(self.W) and y in range(self.H):
-      self.m[x][y] = z
+    randp() {
+        var x = Math.floor(Math.random()*this.H*this.W);
+        var y = Math.floor(x/this.W);
+        x %= this.W;
+        return [x, y];
+    }
 
-  def randp(self):
-    x = int(random()*self.H*self.W)
-    y = x // self.W
-    x %= self.W
-    return x, y
-
-  def gen(self,i=1):
-    self.X, self.Y = m.randp()
-    self.set(self.X,self.Y,' ')
-    for i in range(i):
-      x, y = self.randp()
-      n = 0
-      ni = 0
-      for dx in [-1, 0, 1]:
-        for dy in [-1, 0, 1]:
-          if dx == 0 and dy == 0:
-            continue
-          if self.get(x+dx,y+dy) == ' ':
-            n += 1
-            if dx == 0 or dy == 0:
-              ni += 1
-      if ni == 1 and n < 3:
-        self.set(x,y,' ')
-*/
+    gen(I) {
+        var p = this.randp();
+        this.X = p[0];
+        this.Y = p[1];
+        p = m.randp();
+        var x = p[0];
+        var y = p[1];
+        this.set(this.X,this.Y,' ');
+        for(i=0;i<I;++i) {
+            p = m.randp();
+            x = p[0];
+            y = p[1];
+            let n = 0;
+            let ni = 0;
+            for(let dx=-1;dx<=1;++dx) {
+                for(let dy=-1;dy<=1;++dy) {
+                    if(dx==0&&dy==0)
+                        continue;
+                    if(this.get(x+dx,y+dy)==' ') {
+                        n += 1;
+                        if(dx==0||dy==0)
+                          ni += 1;
+                    }
+                }
+            }
+            if(ni==1&&n<3)
+                this.set(x,y,' ');
+        }
+    }
+}
 
 class CanvasButtons {
     constructor(canvas) {
