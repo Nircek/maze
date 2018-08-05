@@ -13,13 +13,70 @@ var canvas;
 var ctx;
 var WIDTH;
 var HEIGHT;
+var cb;
+
+class CanvasButtons {
+    constructor(canvas) {
+        this.arr = [];
+        this.ctx = canvas.getContext('2d');
+        this.lx = -1;
+        this.ly = -1;
+        canvas.cbs = this;
+        canvas.onclick = function(event) {
+            // https://stackoverflow.com/a/5932203
+            var totalOffsetX = 0;
+            var totalOffsetY = 0;
+            var canvasX = 0;
+            var canvasY = 0;
+            var currentElement = this;
+            do{
+                totalOffsetX += currentElement.offsetLeft - currentElement.scrollLeft;
+                totalOffsetY += currentElement.offsetTop - currentElement.scrollTop;
+            }
+            while(currentElement = currentElement.offsetParent);
+            var cX = event.pageX - totalOffsetX;
+            var cY = event.pageY - totalOffsetY;
+            this.cbs.lx = cX;
+            this.cbs.ly = cY;
+            
+            for(i = 0; i<this.cbs.arr.length; ++i)
+                if(this.cbs.arr[i].x<=cX&&this.cbs.arr[i].cx>=cX&&
+                   this.cbs.arr[i].y<=cY&&this.cbs.arr[i].cy>=cY)
+                    this.cbs.arr[i].f(cX-this.cbs.arr[i].x, cY-this.cbs.arr[i].y);
+        }
+    }
+    add(p, t, o={}, f=null){
+        if(!o.hasOwnProperty('h'))o.h=30;
+        if(!o.hasOwnProperty('m'))o.m=5;
+        if(!o.hasOwnProperty('c'))o.c='black';
+        this.ctx.font = o.h+'px fantasy';
+        this.ctx.strokeStyle = o.c;
+        var w = this.ctx.measureText(t).width;
+        this.ctx.strokeRect(p.x-w/2-o.m, p.y-o.h/2-o.m, w+o.m*2, o.h+o.m*2);
+        this.ctx.strokeText(t, p.x-w/2, p.y+o.h/4);
+        if(f!=null){
+            var n = {x:p.x-w/2-o.m, y:p.y-o.h/2-o.m, w:w+o.m*2, h:o.h+o.m*2, f:f};
+            n.cx = n.x+n.w;
+            n.cy = n.y+n.h;
+            this.arr.push(n);
+        }
+    }
+}
+
+
 function init() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     WIDTH = document.body.scrollWidth;
-    HEIGHT = window.innerHeight-Math.PI;
+    HEIGHT = Math.floor(window.innerHeight-Math.PI);
     canvas.width = WIDTH;
     canvas.height = HEIGHT;
+    ctx.strokeStyle = '#ff1aff';
+    for(i=3; i<5; ++i)
+        ctx.strokeRect(i,i,WIDTH-2*i,HEIGHT-2*i);
+    cb = new CanvasButtons(canvas);
+    
+    cb.add({x:WIDTH/2,y:HEIGHT/2},'Start new game', {h:5}, function(a,b){alert(a+' '+b);});
 }
 </script>
 </head>
