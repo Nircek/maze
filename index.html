@@ -213,13 +213,18 @@ function init() {
         map.genEnd();
         map.render({c:'olive'});
         body.onkeypress = function(e){
-            if(e.key.substr(0, 5)=='Arrow') {
+            console.log(e);
+            if(e.key.substr(0, 5)=='Arrow'||
+               e.key=='W'||e.key=='w'||
+               e.key=='A'||e.key=='a'||
+               e.key=='S'||e.key=='s'||
+               e.key=='D'||e.key=='d') {
                 var d = {x:0, y:0};
-                switch(e.key.substr(5,5)){
-                    case 'Up':    d.y = -1; break;
-                    case 'Down':  d.y = +1; break;
-                    case 'Left':  d.x = -1; break;
-                    case 'Right': d.x = +1; break;
+                switch(e.key){
+                    case 'ArrowUp':   case 'W':case 'w': d.y = -1; break;
+                    case 'ArrowDown': case 'S':case 's': d.y = +1; break;
+                    case 'ArrowLeft': case 'A':case 'a': d.x = -1; break;
+                    case 'ArrowRight':case 'D':case 'd': d.x = +1; break;
                     default: throw RangeError(e.key.substr(5,5)+' is not a direction');
                 }
                 let x = map.X + d.x;
