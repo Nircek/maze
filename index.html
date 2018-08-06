@@ -89,6 +89,14 @@ class Map {
         console.log(jters);
     }
     
+    genEnd() {
+        let p = [-1, -1]
+        while(this.get(p[0], p[1])||p[0]==this.X)
+            p = this.randp()
+        this.eX = p[0];
+        this.eY = p[1];
+    }
+    
     render(o) {
         if(!o)o={}
         if(!o.hasOwnProperty('n'))o.n = 0;
@@ -105,19 +113,22 @@ class Map {
             o.x += o.m;
             o.y += o.m;
         }
+        ctx.clearRect(o.x, o.y, o.s*(this.W+2), o.s*(this.H+2));
         for(let i=0; i<this.W+2; ++i)
             for(let j=0; j<this.H+2; ++j)
                 if(map.get(i-1, j-1))
                     ctx.fillRect(o.x+o.s*i, o.y+o.s*j, o.s-o.n, o.s-o.n);
         this.o = o;
         this.updatePos();
+        ctx.fillStyle = 'green';
+        ctx.fillRect(o.x+o.s*(this.eX+1)+o.s*0.25, o.y+o.s*(this.eY+1)+o.s*0.25, o.s*0.5, o.s*0.5);
     }
     
     updatePos(){
         let o = this.o;
         ctx.fillStyle = 'black';
-        ctx.clearRect(o.x+o.s*(this.lX+1)+o.s*0.25, o.y+o.s*(this.lY+1)+o.s*0.25, o.s*0.75, o.s*0.75);
-        ctx.fillRect(o.x+o.s*(this.X+1)+o.s*0.25, o.y+o.s*(this.Y+1)+o.s*0.25, o.s*0.75, o.s*0.75);
+        ctx.clearRect(o.x+o.s*(this.lX+1), o.y+o.s*(this.lY+1), o.s, o.s);
+        ctx.fillRect(o.x+o.s*(this.X+1)+o.s*0.25, o.y+o.s*(this.Y+1)+o.s*0.25, o.s*0.5, o.s*0.5);
         this.lX = this.X;
         this.lY = this.Y;
         
@@ -199,7 +210,8 @@ function init() {
         this.ctx.clearRect(this.x,this.y,this.w,this.h);
         map = new Map(W, H);
         map.gen();
-        map.render({c:'olive', n:-1});
+        map.genEnd();
+        map.render({c:'olive'});
         body.onkeypress = function(e){
             if(e.key.substr(0, 5)=='Arrow') {
                 var d = {x:0, y:0};
@@ -215,6 +227,12 @@ function init() {
                 if(!map.get(x,y)) {
                     map.X = x;
                     map.Y = y;
+                    if(map.X==map.eX&&map.Y==map.eY) {
+                        map = new Map(W, H);
+                        map.gen();
+                        map.genEnd();
+                        map.render({c:'olive'});
+                    }
                 }
                 map.updatePos();
             }
