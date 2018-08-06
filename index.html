@@ -161,12 +161,15 @@ class CanvasButtons {
     }
 }
 
+var W, H;
 
 function init() {
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     WIDTH = document.body.scrollWidth;
     HEIGHT = Math.floor(window.innerHeight-Math.PI);
+    W = Math.floor(WIDTH / 12);
+    H = Math.floor(HEIGHT / 12);
     canvas.width = WIDTH;
     canvas.height = HEIGHT;
     ctx.strokeStyle = '#ff1aff';
@@ -174,7 +177,11 @@ function init() {
         ctx.strokeRect(i,i,WIDTH-2*i,HEIGHT-2*i);
     cb = new CanvasButtons(canvas);
     
-    cb.add({x:WIDTH/2,y:HEIGHT/2},'Start new game', {b:false}, function(a,b){console.log(this);this.arr.splice(this.arr.indexOf(this),1);this.ctx.clearRect(this.x,this.y,this.w,this.h);printRandomMap(160,90)});
+    cb.add({x:WIDTH/2,y:HEIGHT/2},'Start new game', {b:false}, function(a,b){
+        this.arr.splice(this.arr.indexOf(this),1);
+        this.ctx.clearRect(this.x,this.y,this.w,this.h);
+        printRandomMap(W,H)
+    });
 }
 function printRandomMap(x,y){
     map = new Map(x,y);
@@ -189,7 +196,7 @@ function printRandomMap(x,y){
     for(i=0;i<x;++i)
     for (j=0;j<y;++j)
     if(map.get(i-1,j-1)=='█')
-    ctx.fillRect(wm+s*i, hm+s*j, s-1, s-1);
+    ctx.fillRect(wm+s*i, hm+s*j, s, s);
     
 
 }
