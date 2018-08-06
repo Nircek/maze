@@ -154,6 +154,8 @@ class CanvasButtons {
             var n = {x:p.x-w/2-o.m, y:p.y-o.h/2-o.m, w:w+o.m*2, h:o.h+o.m*2, f:f};
             n.cx = n.x+n.w;
             n.cy = n.y+n.h;
+            n.arr = this.arr;
+            n.ctx = this.ctx;
             this.arr.push(n);
         }
     }
@@ -172,10 +174,11 @@ function init() {
         ctx.strokeRect(i,i,WIDTH-2*i,HEIGHT-2*i);
     cb = new CanvasButtons(canvas);
     
-    cb.add({x:WIDTH/2,y:HEIGHT/2},'Start new game', {b:false}, function(a,b){alert(a+' '+b);s(160,90)});
+    cb.add({x:WIDTH/2,y:HEIGHT/2},'Start new game', {b:false}, function(a,b){console.log(this);this.arr.splice(this.arr.indexOf(this),1);this.ctx.clearRect(this.x,this.y,this.w,this.h);printRandomMap(160,90)});
 }
-function s(x,y){
+function printRandomMap(x,y){
     map = new Map(x,y);
+    x += 2; y += 2;
     map.gen(1000);
     m = 10;
     wm = WIDTH - 2*m;
@@ -185,8 +188,10 @@ function s(x,y){
     hm = (HEIGHT - s*y)/2;
     for(i=0;i<x;++i)
     for (j=0;j<y;++j)
-    if(map.m[i][j]=='█')
+    if(map.get(i-1,j-1)=='█')
     ctx.fillRect(wm+s*i, hm+s*j, s-1, s-1);
+    
+
 }
 </script>
 </head>
