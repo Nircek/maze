@@ -22,9 +22,9 @@ class Map {
         this.H=H;
         this.m = [];
         this.buf = '';
-        for(i=0;i<this.H;++i){
+        for(i=0;i<this.W;++i){
             this.m=this.m.concat([[]]);
-            for(var j=0;j<this.W;++j)
+            for(var j=0;j<this.H;++j)
                 this.m[i]=this.m[i].concat('█');
         }
     }
@@ -57,7 +57,10 @@ class Map {
     }
     set(x,y,z) {
         if(x<this.W&&x>=0&&y<this.H&&y>=0)
-            this.m[x][y] = z
+            if(this.m[x][y]!=z)this.m[x][y] = z;
+            else return false;
+        else return false;
+        return true;
     }
 
     randp() {
@@ -67,16 +70,20 @@ class Map {
         return [x, y];
     }
 
-    gen(I) {
+    gen() {
         var p = this.randp();
         this.X = p[0];
         this.Y = p[1];
-        p = m.randp();
+        p = this.randp();
         var x = p[0];
         var y = p[1];
         this.set(this.X,this.Y,' ');
-        for(i=0;i<I;++i) {
-            p = m.randp();
+        let iters = 0;
+        let jters = 0;
+        while(iters<this.H*this.W*3) {
+            ++iters;
+            ++jters;
+            p = this.randp();
             x = p[0];
             y = p[1];
             let n = 0;
@@ -93,8 +100,11 @@ class Map {
                 }
             }
             if(ni==1&&n<3)
-                this.set(x,y,' ');
+                if(this.set(x,y,' '))
+                    iters = 0;
+            
         }
+        console.log(jters);
     }
 }
 
@@ -162,7 +172,21 @@ function init() {
         ctx.strokeRect(i,i,WIDTH-2*i,HEIGHT-2*i);
     cb = new CanvasButtons(canvas);
     
-    cb.add({x:WIDTH/2,y:HEIGHT/2},'Start new game', {b:false}, function(a,b){alert(a+' '+b);});
+    cb.add({x:WIDTH/2,y:HEIGHT/2},'Start new game', {b:false}, function(a,b){alert(a+' '+b);s(160,90)});
+}
+function s(x,y){
+    map = new Map(x,y);
+    map.gen(1000);
+    m = 10;
+    wm = WIDTH - 2*m;
+    hm = HEIGHT - 2*m;
+    s = Math.min(wm/x, hm/y);
+    wm = (WIDTH - s*x)/2;
+    hm = (HEIGHT - s*y)/2;
+    for(i=0;i<x;++i)
+    for (j=0;j<y;++j)
+    if(map.m[i][j]=='█')
+    ctx.fillRect(wm+s*i, hm+s*j, s-1, s-1);
 }
 </script>
 </head>
