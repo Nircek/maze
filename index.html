@@ -9,6 +9,7 @@
 *{margin: 0;}
 </style>
 <script>
+"use strict";
 var canvas;
 var ctx;
 var WIDTH;
@@ -86,6 +87,28 @@ class Map {
         }
         console.log(jters);
     }
+    
+    render(o) {
+        if(!o)o={}
+        if(!o.hasOwnProperty('n'))o.n = 0;
+        if(!o.hasOwnProperty('m'))o.m = 10;   // margin
+        if(!o.hasOwnProperty('m'))o.c = 'black';
+        ctx.fillStyle = o.c;
+        if(!(o.hasOwnProperty('s')&&o.hasOwnProperty('x')&&o.hasOwnProperty('x'))) {
+            o.x = WIDTH - 2*o.m;
+            o.y = HEIGHT - 2*o.m;
+            o.s = Math.min(o.x/(this.W+2), o.y/(this.H+2));
+            o.x = (WIDTH - o.s*(this.W+2))/2;
+            o.y = (HEIGHT - o.s*(this.H+2))/2;
+        } else {
+            o.x += o.m;
+            o.y += o.m;
+        }
+        for(let i=0; i<this.W+2; ++i)
+            for(let j=0; j<this.H+2; ++j)
+                if(map.get(i-1, j-1))
+                    ctx.fillRect(o.x+o.s*i, o.y+o.s*j, o.s-o.n, o.s-o.n);
+    }
 }
 
 class CanvasButtons {
@@ -112,7 +135,7 @@ class CanvasButtons {
             this.cbs.lx = cX;
             this.cbs.ly = cY;
             
-            for(i = 0; i<this.cbs.arr.length; ++i)  // for each button in arr
+            for(let i = 0; i<this.cbs.arr.length; ++i)  // for each button in arr
                 if(this.cbs.arr[i].x<=cX&&this.cbs.arr[i].cx>=cX&&
                    this.cbs.arr[i].y<=cY&&this.cbs.arr[i].cy>=cY)   // check is there was a click on this button
                     this.cbs.arr[i].f(cX-this.cbs.arr[i].x, cY-this.cbs.arr[i].y);  // if so, call function assigned to this button
@@ -141,7 +164,7 @@ class CanvasButtons {
     }
 }
 
-var W, H;
+var W, H, map;
 
 function init() {
     canvas = document.getElementById('canvas');
@@ -153,32 +176,17 @@ function init() {
     canvas.width = WIDTH;
     canvas.height = HEIGHT;
     ctx.strokeStyle = '#ff1aff';
-    for(i=3; i<5; ++i)
+    for(let i=3; i<5; ++i)
         ctx.strokeRect(i,i,WIDTH-2*i,HEIGHT-2*i);
     cb = new CanvasButtons(canvas);
     
     cb.add({x:WIDTH/2,y:HEIGHT/2},'Start new game', {b:false}, function(a, b){
         this.arr.splice(this.arr.indexOf(this),1);
         this.ctx.clearRect(this.x,this.y,this.w,this.h);
-        renderRandomMap(W, H);
+        map = new Map(W, H);
+        map.gen();
+        map.render({c:'olive', n:-1});
     });
-}
-function renderRandomMap(x, y){
-    map = new Map(x,y);
-    x += 2; y += 2;
-    map.gen(1000);
-    m = 10;
-    wm = WIDTH - 2*m;
-    hm = HEIGHT - 2*m;
-    s = Math.min(wm/x, hm/y);
-    wm = (WIDTH - s*x)/2;
-    hm = (HEIGHT - s*y)/2;
-    for(i=0; i<x; ++i)
-        for(j=0; j<y; ++j)
-            if(map.get(i-1, j-1))
-                ctx.fillRect(wm+s*i, hm+s*j, s, s);
-    
-
 }
 </script>
 </head>
