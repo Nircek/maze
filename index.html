@@ -10,11 +10,10 @@
 </style>
 <script>
 "use strict";
-var canvas;
-var ctx;
-var WIDTH;
-var HEIGHT;
+var canvas, ctx;
+var WIDTH, HEIGHT;
 var cb;
+var body;
 
 
 class Map {
@@ -55,6 +54,8 @@ class Map {
         var p = this.randp();
         this.X = p[0];
         this.Y = p[1];
+        this.lX = this.X;
+        this.lY = this.Y;
         p = this.randp();
         var x = p[0];
         var y = p[1];
@@ -108,6 +109,18 @@ class Map {
             for(let j=0; j<this.H+2; ++j)
                 if(map.get(i-1, j-1))
                     ctx.fillRect(o.x+o.s*i, o.y+o.s*j, o.s-o.n, o.s-o.n);
+        this.o = o;
+        this.updatePos();
+    }
+    
+    updatePos(){
+        let o = this.o;
+        ctx.fillStyle = 'black';
+        ctx.clearRect(o.x+o.s*(this.lX+1)+o.s*0.25, o.y+o.s*(this.lY+1)+o.s*0.25, o.s*0.75, o.s*0.75);
+        ctx.fillRect(o.x+o.s*(this.X+1)+o.s*0.25, o.y+o.s*(this.Y+1)+o.s*0.25, o.s*0.75, o.s*0.75);
+        this.lX = this.X;
+        this.lY = this.Y;
+        
     }
 }
 
@@ -167,6 +180,7 @@ class CanvasButtons {
 var W, H, map;
 
 function init() {
+    body = document.getElementById('body');
     canvas = document.getElementById('canvas');
     ctx = canvas.getContext('2d');
     WIDTH = document.body.scrollWidth;
@@ -186,11 +200,30 @@ function init() {
         map = new Map(W, H);
         map.gen();
         map.render({c:'olive', n:-1});
+        body.onkeypress = function(e){
+            if(e.key.substr(0, 5)=='Arrow') {
+                var d = {x:0, y:0};
+                switch(e.key.substr(5,5)){
+                    case 'Up':    d.y = -1; break;
+                    case 'Down':  d.y = +1; break;
+                    case 'Left':  d.x = -1; break;
+                    case 'Right': d.x = +1; break;
+                    default: throw RangeError(e.key.substr(5,5)+' is not a direction');
+                }
+                let x = map.X + d.x;
+                let y = map.Y + d.y;
+                if(!map.get(x,y)) {
+                    map.X = x;
+                    map.Y = y;
+                }
+                map.updatePos();
+            }
+        }
     });
 }
 </script>
 </head>
-<body onload="init()">
+<body onload="init()" id="body">
 <canvas id="canvas" width="0" height="0"></canvas>
 </body>
 </html>
