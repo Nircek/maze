@@ -91,9 +91,14 @@ class Map {
         console.log(jters);
     }
     
+    dist(a, b) {
+        return Math.sqrt( Math.pow(a.x-b.x, 2) + Math.pow(a.y-b.y, 2) );
+    }
+    
     genEnd() {
         let p = [-1, -1]
-        while(this.get(p[0], p[1])||p[0]==this.X)
+        while(this.get(p[0], p[1])||this.dist({x:p[0],y:p[1]}, {x:this.X,y:this.Y})<this.dist({x:0,y:0},{x:this.W,y:this.H})/2.2)
+            // while endPoint is wall or if is too near to player (diagonal of map/2.2 is too near)
             p = this.randp()
         this.eX = p[0];
         this.eY = p[1];
