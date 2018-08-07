@@ -14,6 +14,8 @@ var canvas, ctx;
 var WIDTH, HEIGHT;
 var cb;
 var body;
+var W, H, map;
+var keylog = false;
 
 
 class Map {
@@ -188,8 +190,6 @@ class CanvasButtons {
     }
 }
 
-var W, H, map;
-
 function init() {
     body = document.getElementById('body');
     canvas = document.getElementById('canvas');
@@ -213,20 +213,16 @@ function init() {
         map.genEnd();
         map.render({c:'olive'});
         body.onkeypress = function(e){
-            console.log(e);
-            if(e.key.substr(0, 5)=='Arrow'||
-               e.key=='W'||e.key=='w'||
-               e.key=='A'||e.key=='a'||
-               e.key=='S'||e.key=='s'||
-               e.key=='D'||e.key=='d') {
-                var d = {x:0, y:0};
-                switch(e.key){
-                    case 'ArrowUp':   case 'W':case 'w': d.y = -1; break;
-                    case 'ArrowDown': case 'S':case 's': d.y = +1; break;
-                    case 'ArrowLeft': case 'A':case 'a': d.x = -1; break;
-                    case 'ArrowRight':case 'D':case 'd': d.x = +1; break;
-                    default: throw RangeError(e.key.substr(5,5)+' is not a direction');
-                }
+            if(keylog)console.log(e);
+            var d = {x:0, y:0};
+            switch(e.key){
+                case 'ArrowUp':   case 'W':case 'w': d.y = -1; break;
+                case 'ArrowDown': case 'S':case 's': d.y = +1; break;
+                case 'ArrowLeft': case 'A':case 'a': d.x = -1; break;
+                case 'ArrowRight':case 'D':case 'd': d.x = +1; break;
+                default: d = -1; break;
+            }
+            if(d!=-1){
                 let x = map.X + d.x;
                 let y = map.Y + d.y;
                 if(!map.get(x,y)) {
