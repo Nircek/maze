@@ -20,75 +20,76 @@ var keylog = false;
 
 class Map {
     constructor(W, H) {
-        this.W = W;
-        this.H = H;
+        this.ds = {x:W, y:H, a:H*W};   //ds is DimensionS
         this.m = [];
         this.buf = '';
-        for(let i=0; i<this.W; ++i){
+        this.minDist = this.dist({x:0,y:0},this.ds)/2;
+        for(let i=0; i<this.ds.x; ++i){
             this.m = this.m.concat([[]]);
-            for(let j=0; j<this.H; ++j)
+            for(let j=0; j<this.ds.y; ++j)
                 this.m[i]  = this.m[i].concat(true);
         }
     }
 
-    get(x, y) {
-        if(x<this.W&&x>=0&&y<this.H&&y>=0)
-            return this.m[x][y];
+    get(p) {
+        if(p.x<this.ds.x&&p.x>=0&&p.y<this.ds.y&&p.y>=0)
+            return this.m[p.x][p.y];
         else return true;
     }
     
-    set(x, y, z) {
-        if(x<this.W&&x>=0&&y<this.H&&y>=0&&
-           this.m[x][y]!=z)
-            this.m[x][y] = z;
+    set(p, z) {
+        if(p.x<this.ds.x&&p.x>=0&&p.y<this.ds.y&&p.y>=0&&
+           this.m[p.x][p.y]!=z)
+            this.m[p.x][p.y] = z;
         else return false;
         return true;
     }
 
     randp() {
-        var x = Math.floor(Math.random()*this.H*this.W);
-        var y = Math.floor(x/this.W);
-        x %= this.W;
-        return [x, y];
+        var x = Math.floor(Math.random()*this.ds.a);
+        var y = Math.floor(x/this.ds.x);
+        x %= this.ds.x;
+        return {x:x, y:y};
     }
 
     gen() {
-        var p = this.randp();
-        this.X = p[0];
-        this.Y = p[1];
-        this.lX = this.X;
-        this.lY = this.Y;
-        p = this.randp();
-        var x = p[0];
-        var y = p[1];
-        this.set(this.X, this.Y, false);
+        this.pl = this.randp();
+        this.lpl = this.pl;
+        this.set(this.pl, false);
         let iters = 0;
         let jters = 0;
-        while(iters<this.H*this.W*3) {
+        while(iters<this.ds.a*3) {
             ++iters;
             ++jters;
-            p = this.randp();
-            x = p[0];
-            y = p[1];
+            let p = this.randp();
             let n = 0;
             let ni = 0;
-            for(let dx=-1; dx<=1; ++dx) {
-                for(let dy=-1; dy<=1; ++dy) {
-                    if(dx==0&&dy==0)
+            let d = {};
+            for(d.x=-1; d.x<=1; ++d.x) {
+                for(d.y=-1; d.y<=1; ++d.y) {
+                    if(d.x==0&&d.y==0)
                         continue;
-                    if(!this.get(x+dx, y+dy)) {
+                    if(!this.get(this.add(p, d))) {
                         n += 1;
-                        if(dx==0||dy==0)
+                        if(d.x==0||d.y==0)
                           ni += 1;
                     }
                 }
             }
             if(ni==1&&n<3)
-                if(this.set(x, y, false))
+                if(this.set(p, false))
                     iters = 0;
             
         }
         console.log(jters);
+    }
+    
+    add(a, b) {
+        return {x:a.x+b.x, y:a.y+b.y};
+    }
+    
+    isSame(a, b) {
+        return a.x==b.x&&a.y==b.y;
     }
     
     dist(a, b) {
@@ -96,12 +97,11 @@ class Map {
     }
     
     genEnd() {
-        let p = [-1, -1]
-        while(this.get(p[0], p[1])||this.dist({x:p[0],y:p[1]}, {x:this.X,y:this.Y})<this.dist({x:0,y:0},{x:this.W,y:this.H})/2.2)
-            // while endPoint is wall or if is too near to player (diagonal of map/2.2 is too near)
+        let p = {x:-1, y:-1}
+        while(this.get(p)||this.dist(p, this.pl)<this.minDist)
+            // while endPoint is wall or if is too near to player (diagonal of map/2 is too near)
             p = this.randp()
-        this.eX = p[0];
-        this.eY = p[1];
+        this.e = p;
     }
     
     render(o) {
@@ -113,31 +113,30 @@ class Map {
         if(!(o.hasOwnProperty('s')&&o.hasOwnProperty('x')&&o.hasOwnProperty('x'))) {
             o.x = WIDTH - 2*o.m;
             o.y = HEIGHT - 2*o.m;
-            o.s = Math.min(o.x/(this.W+2), o.y/(this.H+2));
-            o.x = (WIDTH - o.s*(this.W+2))/2;
-            o.y = (HEIGHT - o.s*(this.H+2))/2;
+            o.s = Math.min(o.x/(this.ds.x+2), o.y/(this.ds.y+2));
+            o.x = (WIDTH - o.s*(this.ds.x+2))/2;
+            o.y = (HEIGHT - o.s*(this.ds.y+2))/2;
         } else {
             o.x += o.m;
             o.y += o.m;
         }
-        ctx.clearRect(o.x, o.y, o.s*(this.W+2), o.s*(this.H+2));
-        for(let i=0; i<this.W+2; ++i)
-            for(let j=0; j<this.H+2; ++j)
-                if(map.get(i-1, j-1))
+        ctx.clearRect(o.x, o.y, o.s*(this.ds.x+2), o.s*(this.ds.y+2));
+        for(let i=0; i<this.ds.x+2; ++i)
+            for(let j=0; j<this.ds.y+2; ++j)
+                if(map.get({x:i-1, y:j-1}))
                     ctx.fillRect(o.x+o.s*i, o.y+o.s*j, o.s-o.n, o.s-o.n);
         this.o = o;
         this.updatePos();
         ctx.fillStyle = 'green';
-        ctx.fillRect(o.x+o.s*(this.eX+1)+o.s*0.25, o.y+o.s*(this.eY+1)+o.s*0.25, o.s*0.5, o.s*0.5);
+        ctx.fillRect(o.x+o.s*(this.e.x+1)+o.s*0.25, o.y+o.s*(this.e.y+1)+o.s*0.25, o.s*0.5, o.s*0.5);
     }
     
     updatePos(){
         let o = this.o;
         ctx.fillStyle = 'black';
-        ctx.clearRect(o.x+o.s*(this.lX+1), o.y+o.s*(this.lY+1), o.s, o.s);
-        ctx.fillRect(o.x+o.s*(this.X+1)+o.s*0.25, o.y+o.s*(this.Y+1)+o.s*0.25, o.s*0.5, o.s*0.5);
-        this.lX = this.X;
-        this.lY = this.Y;
+        ctx.clearRect(o.x+o.s*(this.lpl.x+1), o.y+o.s*(this.lpl.y+1), o.s, o.s);
+        ctx.fillRect(o.x+o.s*(this.pl.x+1)+o.s*0.25, o.y+o.s*(this.pl.y+1)+o.s*0.25, o.s*0.5, o.s*0.5);
+        this.lpl = this.pl;
         
     }
 }
@@ -212,7 +211,7 @@ function init() {
     
     cb.add({x:WIDTH/2,y:HEIGHT/2},'Start new game', {b:false}, function(a, b){
         this.arr.splice(this.arr.indexOf(this),1);
-        this.ctx.clearRect(this.x,this.y,this.w,this.h);
+        this.ctx.clearRect(this.x,this.y,this.W,this.H);
         map = new Map(W, H);
         map.gen();
         map.genEnd();
@@ -228,12 +227,10 @@ function init() {
                 default: d = -1; break;
             }
             if(d!=-1){
-                let x = map.X + d.x;
-                let y = map.Y + d.y;
-                if(!map.get(x,y)) {
-                    map.X = x;
-                    map.Y = y;
-                    if(map.X==map.eX&&map.Y==map.eY) {
+                let n = map.add(map.pl, d);
+                if(!map.get(n)) {
+                    map.pl = n
+                    if(map.isSame(map.pl, map.e)) {
                         map = new Map(W, H);
                         map.gen();
                         map.genEnd();
